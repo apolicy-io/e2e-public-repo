@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: ubuntu
+  name: e2e-public-deployment 
+  namespace: e2e
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: ubuntu
+  template:
+    metadata:
+      labels:
+        component: ubuntu
+    spec:
+      containers:
+        - name : ubuntu-container
+          image: ubuntu/trusty
