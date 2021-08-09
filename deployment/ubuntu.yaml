@@ -1,20 +1,70 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    component: ubuntu
   name: e2e-public-deployment 
   namespace: e2e-public
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      component: ubuntu
+      app: web
+  replicas: 1
   template:
     metadata:
+      annotations:
+        imageregistry: "https://hub.docker.com/"
       labels:
-        component: ubuntu
+        app: web
     spec:
+      automountServiceAccountToken: false
+      hostIPC: false
+      hostPID: false
+      volumes:
+        - name: etc-volume
+          hostPath:
+            path: /var/etc
+      serviceAccountName: ns-best
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 11003
+        runAsGroup: 11013
       containers:
-        - name : ubuntu-container
-          image: ubuntu/trusty
+        - name: best-redis-container
+          readOnlyRootFilesystem: true
+          resources:
+            limits:
+              memory: "200Mi"
+              cpu: "1"
+            requests:
+              memory: "100Mi"
+              cpu: "0.5"
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - cat
+                - /tmp/healthy
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          securityContext:
+            capabilities:
+              drop:
+                - all
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 11004
+            runAsGroup: 11014
+            privileged: false
+          image: redis:alpine3.12@sha256:2fd66d722006b2a333899fb7fc4f4f3c9e3abfb852ce659951f76f677a43223d
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: etc-volume
+              mountPath: /mnt/etc
+              readOnly: true
+          ports:
+            - containerPort: 6379
+              name: redis
+              protocol: TCP
