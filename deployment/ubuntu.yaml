@@ -4,7 +4,7 @@ metadata:
   labels:
     component: ubuntu
   name: e2e-public-deployment 
-  namespace: e2e
+  namespace: e2e-public
 spec:
   replicas: 1
   selector:
