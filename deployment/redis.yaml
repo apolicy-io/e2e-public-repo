@@ -29,7 +29,6 @@ spec:
         runAsGroup: 11013
       containers:
         - name: best-redis-container
-          readOnlyRootFilesystem: true
           resources:
             limits:
               memory: "200Mi"
@@ -58,6 +57,7 @@ spec:
             runAsUser: 11004
             runAsGroup: 11014
             privileged: false
+            readOnlyRootFilesystem: true
           image: redis:alpine3.12@sha256:2fd66d722006b2a333899fb7fc4f4f3c9e3abfb852ce659951f76f677a43223d
           imagePullPolicy: Always
           volumeMounts:
